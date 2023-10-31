@@ -4,12 +4,14 @@ import Classe.Caddie;
 import Classe.Employe;
 import Classe.Facture;
 import OVESP.*;
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -98,9 +100,11 @@ public class Model {
                 } else {
                     message = ("probleme lors de la tentative de connection");
                 }
-            } catch (IOException | ClassNotFoundException ex) {
-                message = ("problème lors du login : " + ex.getMessage());
+            } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchProviderException ex) {
+                ex.printStackTrace();
+                message = "problème lors du login : " + ex.getMessage();
             }
+
         }
         return v;
     }

@@ -12,9 +12,15 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.io.*;
+import java.net.Socket;
+import java.security.*;
+import javax.crypto.*;
+
 
 public class Model {
     private List<Facture> factures = new ArrayList<>();
@@ -81,21 +87,25 @@ public class Model {
             message = ("rah ouais, t'essaies quoi la?");
         } else {
             try {
+//                //tentative de cryptage
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                DataOutputStream dos = new DataOutputStream(baos);
+//                dos.writeUTF(nom);
+//                dos.writeUTF(mdp);
+//                //TODO FAIRE QQCH POUR LA CREATION
+//                byte[] messageClair = baos.toByteArray();
+//                SecretKey cle = RecupereCleSecrete();
+//                System.out.println("Récupération clé secrète : " + cle);
+
 
                 RequeteLogin requete = new RequeteLogin(nom, mdp, creation);
                 oos.writeObject(requete);
                 System.out.println("est passé dans le login requete" + requete);
                 ReponseLogin reponse = (ReponseLogin) ois.readObject();
-                System.out.println("est passé dans le login après lecture");
-                System.out.println(reponse.isValide());
-                System.out.println();
-                System.out.println();
                 if (reponse.isValide()) {
                     employe = new Employe(nom, mdp);
-
                     message = ("connecté");
                     v = true;
-
                     islogged = true;
                 } else {
                     message = ("probleme lors de la tentative de connection");
@@ -103,6 +113,16 @@ public class Model {
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchProviderException ex) {
                 ex.printStackTrace();
                 message = "problème lors du login : " + ex.getMessage();
+            } catch (UnrecoverableKeyException e) {
+                throw new RuntimeException(e);
+            } catch (CertificateException e) {
+                throw new RuntimeException(e);
+            } catch (SignatureException e) {
+                throw new RuntimeException(e);
+            } catch (KeyStoreException e) {
+                throw new RuntimeException(e);
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException(e);
             }
 
         }
@@ -188,6 +208,13 @@ public class Model {
         }
 
     }
+//    public static SecretKey RecupereCleSecrete() throws IOException, ClassNotFoundException {
+//        // Désérialisation de la clé secrète du fichier
+//        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("cleSecrete.ser"));
+//        SecretKey cle = (SecretKey) ois.readObject();
+//        ois.close();
+//        return cle;
+//    }
 
 
 }

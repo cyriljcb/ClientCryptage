@@ -31,4 +31,16 @@ public class RequeteFacture implements Requete{
         PrivateKey cle = (PrivateKey) ks.getKey("ClientCryptage","ClientCryptage".toCharArray());
         return cle;
     }
+    public boolean VerifySignature(PublicKey clePubliqueClient) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IOException, SignatureException {
+        // Construction de l'objet Signature
+        Signature s = Signature.getInstance("SHA1withRSA","BC");
+        s.initVerify(clePubliqueClient);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF(idClient);
+        s.update(baos.toByteArray());
+
+        // Vérification de la signature reçue
+        return s.verify(signature);
+    }
 }

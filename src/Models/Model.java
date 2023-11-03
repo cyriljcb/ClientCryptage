@@ -5,6 +5,8 @@ import Classe.Employe;
 import Classe.Facture;
 import Cryptage.MyCrypto;
 import OVESP.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.io.*;
@@ -90,22 +93,12 @@ public class Model {
             message = ("rah ouais, t'essaies quoi la?");
         } else {
             try {
-//                //tentative de cryptage
-//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                DataOutputStream dos = new DataOutputStream(baos);
-//                dos.writeUTF(nom);
-//                dos.writeUTF(mdp);
-//                //TODO FAIRE QQCH POUR LA CREATION
-//                byte[] messageClair = baos.toByteArray();
-//                SecretKey cle = RecupereCleSecrete();
-//                System.out.println("Récupération clé secrète : " + cle);
-
-
                 //pour la clé de session
                 ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
                 DataOutputStream dos1 = new DataOutputStream(baos1);
                 dos1.writeUTF(nom);
                 dos1.writeUTF(mdp);
+                //TODO creation de login
                 byte[] messageClair = baos1.toByteArray();
                 // Génération d'une clé de session
                 KeyGenerator cleGen = KeyGenerator.getInstance("DES","BC");
@@ -148,25 +141,69 @@ public class Model {
         return v;
     }
 
+
     public boolean Rechercher(String idCli) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, SignatureException, NoSuchProviderException, InvalidKeyException {
         boolean v = false;
         numClient = Integer.parseInt(idCli);
-        if (idCli.matches("\\d+"))    //pour les chiffres positifs
-        {
+
+        if (idCli.matches("\\d+")) {
             RequeteFacture requete = new RequeteFacture(idCli);
 
             try {
                 oos.writeObject(requete);
                 ReponseFacture reponse = (ReponseFacture) ois.readObject();
-                factures = reponse.getFacture();
-                v = true;
-            } catch (IOException | ClassNotFoundException ex) {
+
+                if (reponse.getFactureCrypte() != null) {
+                    byte[] facturesCryptees = reponse.getFactureCrypte();
+                    byte[] facturesDecryptees = decryptFacture(facturesCryptees);
+                    System.out.println("facture : "+facturesDecryptees);
+                    // Maintenant, vous avez les factures désérialisées
+                   factures = deserializeFactures(facturesDecryptees);
+
+                    v = true;
+                } else {
+                    message = reponse.getMessage();
+                }
+            } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | NoSuchPaddingException |
+                     BadPaddingException ex) {
                 throw new RuntimeException(ex);
             }
-        } else
-            message = ("veuillez entrer un id de facture valide");
+        } else {
+            message = "Veuillez entrer un ID de facture valide.";
+        }
+
         return v;
     }
+
+    private List<Facture> deserializeFactures(byte[] facturesBytes) {
+        List<Facture> factures = new ArrayList<>();
+        ByteArrayInputStream bais = new ByteArrayInputStream(facturesBytes);
+        DataInputStream dis = new DataInputStream(bais);
+
+        try {
+            int numberOfFactures = dis.readInt();
+
+            for (int i = 0; i < numberOfFactures; i++) {
+                Facture facture = Facture.fromDataInputStream(dis);
+                if (facture != null) {
+                    factures.add(facture);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return factures;
+    }
+
+
+
+    private byte[] decryptFacture(byte[] facture) throws IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
+        byte[] messageDecrypte;
+        messageDecrypte = MyCrypto.DecryptSymDES(cleSession, facture);
+        return messageDecrypte;
+    }
+
 
     public boolean payer(String nom, String numVisa, int Row, String info) {
         boolean v = false;

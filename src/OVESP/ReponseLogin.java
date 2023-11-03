@@ -1,12 +1,20 @@
 package OVESP;
 
-public class ReponseLogin implements Reponse{
+public class ReponseLogin implements Reponse {
     private boolean valide;
+    private String message;
 
-    ReponseLogin(boolean v) {
+    ReponseLogin(boolean v,String message) {
         valide = v;
+        if(v)
+            this.message = message;
     }
     public boolean isValide() {
         return valide;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
 }

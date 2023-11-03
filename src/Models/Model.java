@@ -132,21 +132,23 @@ public class Model {
                     v = true;
                     islogged = true;
                 } else {
-                    message = ("probleme lors de la tentative de connection");
+                    System.out.println("le messsage = "+reponse.getMessage());
+                    message = reponse.getMessage();
                 }
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchProviderException ex) {
                 ex.printStackTrace();
                 message = "problème lors du login : " + ex.getMessage();
             } catch (UnrecoverableKeyException | CertificateException | SignatureException | KeyStoreException |
                      InvalidKeyException | IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                System.out.println("attention Erreur : " + e.getMessage());
             }
 
         }
         return v;
     }
 
-    public boolean Rechercher(String idCli) {
+    public boolean Rechercher(String idCli) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, SignatureException, NoSuchProviderException, InvalidKeyException {
         boolean v = false;
         numClient = Integer.parseInt(idCli);
         if (idCli.matches("\\d+"))    //pour les chiffres positifs
@@ -182,7 +184,9 @@ public class Model {
                     message = ("Facture payée");
                     v = true;
                 } else message = ("Probleme lors du paiement de la facture");
-            } catch (IOException | ClassNotFoundException ex) {
+            } catch (IOException | ClassNotFoundException | UnrecoverableKeyException | CertificateException |
+                     NoSuchAlgorithmException | KeyStoreException | SignatureException | NoSuchProviderException |
+                     InvalidKeyException ex) {
                 throw new RuntimeException(ex);
             }
         } else
@@ -197,8 +201,8 @@ public class Model {
             ReponseCaddie reponse1 = (ReponseCaddie) ois.readObject();
             caddie1 = reponse1.getCaddieList();
         } catch (IOException | ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
-                }
+            throw new RuntimeException(ex);
+        }
 
     }
 
@@ -236,4 +240,3 @@ public class Model {
 
 
 }
-

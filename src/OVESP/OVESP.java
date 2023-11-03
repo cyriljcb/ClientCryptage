@@ -3,25 +3,19 @@ package OVESP;
 import java.net.Socket;
 import java.util.HashMap;
 
-public class OVESP implements Protocole {
+public class OVESP //implements Protocole
+{
     private HashMap<String, String> passwords;
     private HashMap<String, Socket> clientsConnectes;
-    private HashMap<Integer,String> idClientConnectes;
+    private HashMap<Integer, String> idClientConnectes;
 
     private Logger logger;
 
     public OVESP(Logger log) {
-        passwords = new HashMap<>();
-        passwords.put("wagner", "abcd");
-        passwords.put("charlet", "1234");
-        passwords.put("calmant", "azerty");
 
-        logger = log;
-
-        clientsConnectes = new HashMap<>();
-        idClientConnectes= new HashMap();
     }
-
+}
+/*
     @Override
     public String getNom() {
         return "OVESP";
@@ -29,9 +23,9 @@ public class OVESP implements Protocole {
 
     @Override
     public synchronized ReponseLogin TraiteRequete(Requete requete, Socket socket) throws FinConnexionException {
-        if (requete instanceof RequeteLogin) return TraiteRequeteLOGIN((RequeteLogin) requete, socket);
-        if (requete instanceof RequeteLOGOUT) TraiteRequeteLOGOUT((RequeteLOGOUT) requete);
-        if (requete instanceof RequetClientId) TraiteRequetClientId((RequetClientId)requete);
+//        if (requete instanceof RequeteLogin) return TraiteRequeteLOGIN((RequeteLogin) requete, socket);
+//        if (requete instanceof RequeteLOGOUT) TraiteRequeteLOGOUT((RequeteLOGOUT) requete);
+//        if (requete instanceof RequetClientId) TraiteRequetClientId((RequetClientId)requete);
         return null;
     }
 
@@ -60,4 +54,4 @@ public class OVESP implements Protocole {
 
     }
 
-}
+}*/

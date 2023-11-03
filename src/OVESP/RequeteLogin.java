@@ -22,11 +22,6 @@ public class RequeteLogin implements Requete{
     public byte[] getData1() { return data1; }
     public void setData2(byte[] d) { data2 = d; }
     public byte[] getData2() { return data2; }
-
-    public byte[] getDigest() {
-        return digest;
-    }
-
     boolean nouveau = false;
     public RequeteLogin(String l, String p, boolean v) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeyException, SignatureException, UnrecoverableKeyException, CertificateException, KeyStoreException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException {
         login = l;
@@ -58,7 +53,6 @@ public class RequeteLogin implements Requete{
         dos1.writeUTF(p);
         s.update(baos1.toByteArray());
         signature = s.sign();
-
     }
     public boolean VerifyPassword(String password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
     {
@@ -76,21 +70,6 @@ public class RequeteLogin implements Requete{
         // Comparaison digest reçu et digest local
         return MessageDigest.isEqual(digest,digestLocal);
     }
-    public boolean VerifyLogin(String receivedLogin) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
-        // Construction du digest local pour le login reçu
-        MessageDigest md = MessageDigest.getInstance("SHA-1", "BC");
-        md.update(receivedLogin.getBytes());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        dos.writeLong(temps);
-        dos.writeDouble(alea);
-        md.update(baos.toByteArray());
-        byte[] digestLocal = md.digest();
-
-        // Comparaison du digest reçu avec le digest local du login
-        return MessageDigest.isEqual(digest, digestLocal);
-    }
-
     public boolean VerifySignature(PublicKey clePubliqueClient) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IOException, SignatureException {
         // Construction de l'objet Signature
         Signature s = Signature.getInstance("SHA1withRSA","BC");
@@ -104,6 +83,10 @@ public class RequeteLogin implements Requete{
         // Vérification de la signature reçue
         return s.verify(signature);
     }
+    public boolean VerifyLogin(String receivedLogin) {
+        return login.equals(receivedLogin);
+    }
+
     public static PrivateKey RecupereClePriveeClient() throws KeyStoreException, IOException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(new FileInputStream("KeystoreClientCryptage.jks"),"ClientCryptage".toCharArray());
@@ -113,12 +96,5 @@ public class RequeteLogin implements Requete{
     }
     public String getLogin() {
         return login;
-    }
-    public String getPassword() {
-        return mdp;
-    }
-
-    public boolean isNouveau() {
-        return nouveau;
     }
 }

@@ -34,6 +34,7 @@ public class Model {
     private boolean islogged = false;
     private Employe employe;
     private int numClient;
+    private SecretKey cleSession;
     private  List<Caddie> caddie1 = new ArrayList<>();
 
     private void initializeObjectStreams() {
@@ -106,26 +107,18 @@ public class Model {
                 dos1.writeUTF(nom);
                 dos1.writeUTF(mdp);
                 byte[] messageClair = baos1.toByteArray();
-                System.out.println("le message en clair : "+messageClair );
                 // Génération d'une clé de session
                 KeyGenerator cleGen = KeyGenerator.getInstance("DES","BC");
                 cleGen.init(new SecureRandom());
-                SecretKey cleSession = cleGen.generateKey();
-                System.out.println("Génération d'une clé de session : " + cleSession);
+                cleSession = cleGen.generateKey();
                 // Recuperation de la clé publique du serveur
                 PublicKey clePubliqueServeur = RecupereClePubliqueServeur();
-                System.out.println("Récupération clé publique du serveur : " + clePubliqueServeur);
                 // Cryptage asymétrique de la clé de session
                 byte[] cleSessionCrypte;
                 cleSessionCrypte = MyCrypto.CryptAsymRSA(clePubliqueServeur,cleSession.getEncoded());
-                System.out.println("Cryptage asymétrique de la clé de session : " + new String(cleSessionCrypte));
-
                 // Cryptage symétrique du message
                 byte[] messageCrypte;
                 messageCrypte = MyCrypto.CryptSymDES(cleSession,messageClair);
-                System.out.println("Cryptage symétrique du message : " + new String(messageCrypte));
-
-
 
                 RequeteLogin requete = new RequeteLogin(nom, mdp, creation);
                 requete.setData1(cleSessionCrypte);

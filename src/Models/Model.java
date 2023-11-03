@@ -3,6 +3,7 @@ package Models;
 import Classe.Caddie;
 import Classe.Employe;
 import Classe.Facture;
+import Cryptage.MyCrypto;
 import OVESP.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.io.FileInputStream;
@@ -13,6 +14,7 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -98,7 +100,36 @@ public class Model {
 //                System.out.println("Récupération clé secrète : " + cle);
 
 
+                //pour la clé de session
+                ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+                DataOutputStream dos1 = new DataOutputStream(baos1);
+                dos1.writeUTF(nom);
+                dos1.writeUTF(mdp);
+                byte[] messageClair = baos1.toByteArray();
+                System.out.println("le message en clair : "+messageClair );
+                // Génération d'une clé de session
+                KeyGenerator cleGen = KeyGenerator.getInstance("DES","BC");
+                cleGen.init(new SecureRandom());
+                SecretKey cleSession = cleGen.generateKey();
+                System.out.println("Génération d'une clé de session : " + cleSession);
+                // Recuperation de la clé publique du serveur
+                PublicKey clePubliqueServeur = RecupereClePubliqueServeur();
+                System.out.println("Récupération clé publique du serveur : " + clePubliqueServeur);
+                // Cryptage asymétrique de la clé de session
+                byte[] cleSessionCrypte;
+                cleSessionCrypte = MyCrypto.CryptAsymRSA(clePubliqueServeur,cleSession.getEncoded());
+                System.out.println("Cryptage asymétrique de la clé de session : " + new String(cleSessionCrypte));
+
+                // Cryptage symétrique du message
+                byte[] messageCrypte;
+                messageCrypte = MyCrypto.CryptSymDES(cleSession,messageClair);
+                System.out.println("Cryptage symétrique du message : " + new String(messageCrypte));
+
+
+
                 RequeteLogin requete = new RequeteLogin(nom, mdp, creation);
+                requete.setData1(cleSessionCrypte);
+                requete.setData2(messageCrypte);
                 oos.writeObject(requete);
                 System.out.println("est passé dans le login requete" + requete);
                 ReponseLogin reponse = (ReponseLogin) ois.readObject();
@@ -113,15 +144,8 @@ public class Model {
             } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchProviderException ex) {
                 ex.printStackTrace();
                 message = "problème lors du login : " + ex.getMessage();
-            } catch (UnrecoverableKeyException e) {
-                throw new RuntimeException(e);
-            } catch (CertificateException e) {
-                throw new RuntimeException(e);
-            } catch (SignatureException e) {
-                throw new RuntimeException(e);
-            } catch (KeyStoreException e) {
-                throw new RuntimeException(e);
-            } catch (InvalidKeyException e) {
+            } catch (UnrecoverableKeyException | CertificateException | SignatureException | KeyStoreException |
+                     InvalidKeyException | IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException e) {
                 throw new RuntimeException(e);
             }
 
@@ -208,13 +232,14 @@ public class Model {
         }
 
     }
-//    public static SecretKey RecupereCleSecrete() throws IOException, ClassNotFoundException {
-//        // Désérialisation de la clé secrète du fichier
-//        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("cleSecrete.ser"));
-//        SecretKey cle = (SecretKey) ois.readObject();
-//        ois.close();
-//        return cle;
-//    }
+    public static PublicKey RecupereClePubliqueServeur() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        // Récupération de la clé publique de Jean-Marc dans le keystore deChristophe
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(new FileInputStream("KeystoreClientCryptage.jks"),"ClientCryptage".toCharArray());
+        X509Certificate certif = (X509Certificate)ks.getCertificate("ServeurCryptage");
+        PublicKey cle = certif.getPublicKey();
+        return cle;
+    }
 
 
 }

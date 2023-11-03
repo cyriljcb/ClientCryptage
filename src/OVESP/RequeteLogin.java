@@ -1,6 +1,8 @@
 package OVESP;
+import Cryptage.MyCrypto;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.crypto.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -13,18 +15,25 @@ public class RequeteLogin implements Requete{
     private long temps;
     private double alea;
     private byte[] digest;
-    private byte[] data;
+    private byte[] data1;
+    private byte[] data2;
     private byte[] signature;
-    public void setData(byte[] d) { data = d; }
-    public byte[] getData() { return data; }
+    public void setData1(byte[] d) { data1 = d; }
+    public byte[] getData1() { return data1; }
+    public void setData2(byte[] d) { data2 = d; }
+    public byte[] getData2() { return data2; }
+
+    public byte[] getDigest() {
+        return digest;
+    }
 
     boolean nouveau = false;
-    public RequeteLogin(String l, String p, boolean v) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeyException, SignatureException, UnrecoverableKeyException, CertificateException, KeyStoreException {
+    public RequeteLogin(String l, String p, boolean v) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeyException, SignatureException, UnrecoverableKeyException, CertificateException, KeyStoreException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException {
         login = l;
         nouveau = v;
 
         mdp  = p;
-        //pour le digest salé
+        //pour le digest salé (intégrité des fichiers)
         // Construction du sel
         this.temps = new Date().getTime();
         this.alea = Math.random();
@@ -40,7 +49,7 @@ public class RequeteLogin implements Requete{
         md.update(baos.toByteArray());
         digest = md.digest();
 
-       //pour la signature
+        //pour la signature
         Signature s = Signature.getInstance("SHA1withRSA","BC");
         s.initSign(RecupereClePriveeClient());
         ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
@@ -49,9 +58,6 @@ public class RequeteLogin implements Requete{
         dos1.writeUTF(p);
         s.update(baos1.toByteArray());
         signature = s.sign();
-
-
-
 
     }
     public boolean VerifyPassword(String password) throws NoSuchAlgorithmException, NoSuchProviderException, IOException
@@ -70,6 +76,21 @@ public class RequeteLogin implements Requete{
         // Comparaison digest reçu et digest local
         return MessageDigest.isEqual(digest,digestLocal);
     }
+    public boolean VerifyLogin(String receivedLogin) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+        // Construction du digest local pour le login reçu
+        MessageDigest md = MessageDigest.getInstance("SHA-1", "BC");
+        md.update(receivedLogin.getBytes());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeLong(temps);
+        dos.writeDouble(alea);
+        md.update(baos.toByteArray());
+        byte[] digestLocal = md.digest();
+
+        // Comparaison du digest reçu avec le digest local du login
+        return MessageDigest.isEqual(digest, digestLocal);
+    }
+
     public boolean VerifySignature(PublicKey clePubliqueClient) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, IOException, SignatureException {
         // Construction de l'objet Signature
         Signature s = Signature.getInstance("SHA1withRSA","BC");

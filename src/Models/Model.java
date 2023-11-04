@@ -98,6 +98,8 @@ public class Model {
                 DataOutputStream dos1 = new DataOutputStream(baos1);
                 dos1.writeUTF(nom);
                 dos1.writeUTF(mdp);
+                dos1.writeBoolean(creation);
+
                 //TODO creation de login
                 byte[] messageClair = baos1.toByteArray();
                 // Génération d'une clé de session
@@ -121,7 +123,7 @@ public class Model {
                 ReponseLogin reponse = (ReponseLogin) ois.readObject();
                 if (reponse.isValide()) {
                     employe = new Employe(nom, mdp);
-                    message = ("connecté");
+                    message = reponse.getMessage();
                     v = true;
                     islogged = true;
                 } else {

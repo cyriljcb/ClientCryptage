@@ -30,18 +30,27 @@ public class PayerController implements ActionListener {
         int Row = view.getFactureTable().getSelectedRow();
         DefaultTableModel model1 = (DefaultTableModel) view.getFactureTable().getModel();
         String info = model1.getValueAt(Row, 0).toString();
+        boolean paye = (boolean) model1.getValueAt(Row, 3);
         String nom = view.getNomVisa();
         String numVisa = view.getNumVisa();
-        try {
-            if(model.payer(nom,numVisa,Row,info))
-                view.updateViewPayer(model);
-            else
-                view.updateViewMessage(model);
-        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException |
-                 IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException | InvalidKeyException |
-                 NoSuchProviderException ex) {
-            throw new RuntimeException(ex);
+        if(!paye)
+        {
+            try {
+                if(model.payer(nom,numVisa,Row,info))
+                    view.updateViewPayer(model);
+                else
+                    view.updateViewMessage(model);
+            } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException |
+                     IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException | InvalidKeyException |
+                     NoSuchProviderException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        else
+        {
+            view.updateViewMessage("la facture n'est plus a payer");
+        }
+
 
     }
 }

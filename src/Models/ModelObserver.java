@@ -7,6 +7,7 @@ public interface ModelObserver {
     void updateViewPayer(Model model);
     void updateViewLogout(Model model);
     void updateViewTable(Model model);
+    void updateViewMessage(String msg);
 
 
 }

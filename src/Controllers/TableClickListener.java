@@ -23,8 +23,11 @@ public class TableClickListener implements MouseListener {
             if (row != -1) { // Vérifiez d'abord si une ligne est sélectionnée
                 DefaultTableModel model1 = (DefaultTableModel) view.getFactureTable().getModel();
                 String info = model1.getValueAt(row, 0).toString();
-                model.caddie(info);
-                view.updateViewTable(model);
+                boolean v = model.caddie(info);
+                if(v)
+                    view.updateViewTable(model);
+                else
+                    view.updateViewMessage(model);
             }
         }
     }

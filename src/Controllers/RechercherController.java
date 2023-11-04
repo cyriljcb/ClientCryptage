@@ -19,15 +19,20 @@ public class RechercherController implements ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            if(model.Rechercher(view.getNumClient()))
-                view.updateViewRechercher(model);
-            else
-                view.updateViewMessage(model);
-        } catch (UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException |
-                 IOException | SignatureException | NoSuchProviderException | InvalidKeyException ex) {
-            throw new RuntimeException(ex);
+        if(view.getNumClient().matches("\\d+"))
+        {
+            try {
+                if(model.Rechercher(view.getNumClient()))
+                    view.updateViewRechercher(model);
+                else
+                    view.updateViewMessage(model);
+            } catch (UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException |
+                     IOException | SignatureException | NoSuchProviderException | InvalidKeyException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        else
+            view.updateViewMessage("Veuillez saisir un numéro de client valide");
 
     }
 }

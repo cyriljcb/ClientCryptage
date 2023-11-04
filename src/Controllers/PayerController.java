@@ -3,9 +3,18 @@ package Controllers;
 import Models.Model;
 import View.ClientPaiement;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 
 public class PayerController implements ActionListener {
     private Model model;
@@ -23,10 +32,16 @@ public class PayerController implements ActionListener {
         String info = model1.getValueAt(Row, 0).toString();
         String nom = view.getNomVisa();
         String numVisa = view.getNumVisa();
-        if(model.payer(nom,numVisa,Row,info))
-            view.updateViewPayer(model);
-        else
-            view.updateViewMessage(model);
+        try {
+            if(model.payer(nom,numVisa,Row,info))
+                view.updateViewPayer(model);
+            else
+                view.updateViewMessage(model);
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException |
+                 IllegalBlockSizeException | NoSuchPaddingException | BadPaddingException | InvalidKeyException |
+                 NoSuchProviderException ex) {
+            throw new RuntimeException(ex);
+        }
 
     }
 }

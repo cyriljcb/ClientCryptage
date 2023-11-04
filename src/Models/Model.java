@@ -141,7 +141,25 @@ public class Model {
         return v;
     }
 
-
+//    public boolean Rechercher(String idCli) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, SignatureException, NoSuchProviderException, InvalidKeyException {
+//        boolean v = false;
+//        numClient = Integer.parseInt(idCli);
+//        if (idCli.matches("\\d+"))    //pour les chiffres positifs
+//        {
+//            RequeteFacture requete = new RequeteFacture(idCli);
+//
+//            try {
+//                oos.writeObject(requete);
+//                ReponseFacture reponse = (ReponseFacture) ois.readObject();
+//                factures = reponse.getFacture();
+//                v = true;
+//            } catch (IOException | ClassNotFoundException ex) {
+//                throw new RuntimeException(ex);
+//            }
+//        } else
+//            message = ("veuillez entrer un id de facture valide");
+//        return v;
+//    }
     public boolean Rechercher(String idCli) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, SignatureException, NoSuchProviderException, InvalidKeyException {
         boolean v = false;
         numClient = Integer.parseInt(idCli);
@@ -175,29 +193,6 @@ public class Model {
         return v;
     }
 
-    private List<Facture> deserializeFactures(byte[] facturesBytes) {
-        List<Facture> factures = new ArrayList<>();
-        ByteArrayInputStream bais = new ByteArrayInputStream(facturesBytes);
-        DataInputStream dis = new DataInputStream(bais);
-
-        try {
-            int numberOfFactures = dis.readInt();
-
-            for (int i = 0; i < numberOfFactures; i++) {
-                Facture facture = Facture.fromDataInputStream(dis);
-                if (facture != null) {
-                    factures.add(facture);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return factures;
-    }
-
-
-
     private byte[] decryptFacture(byte[] facture) throws IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException {
         byte[] messageDecrypte;
         messageDecrypte = MyCrypto.DecryptSymDES(cleSession, facture);
@@ -205,15 +200,63 @@ public class Model {
     }
 
 
-    public boolean payer(String nom, String numVisa, int Row, String info) {
-        boolean v = false;
-        if (Row != -1) {
+//    public boolean payer(String nom, String numVisa, int Row, String info) {
+//        boolean v = false;
+//        if (Row != -1) {
+//
+//            RequetePayeFacture requete = new RequetePayeFacture(info, String.valueOf(numClient), nom, numVisa);
+//            try {
+//                oos.writeObject(requete);
+//                ReponsePayeFacture reponse1 = (ReponsePayeFacture) ois.readObject();
+//                if (reponse1.getPaye()) {
+//                    RequeteFacture requete1 = new RequeteFacture(String.valueOf(numClient));
+//                    oos.writeObject(requete1);
+//                    ReponseFacture reponse = (ReponseFacture) ois.readObject();
+//                    factures = reponse.getFacture();
+//                    message = ("Facture payée");
+//                    v = true;
+//                } else message = ("Probleme lors du paiement de la facture");
+//            } catch (IOException | ClassNotFoundException | UnrecoverableKeyException | CertificateException |
+//                     NoSuchAlgorithmException | KeyStoreException | SignatureException | NoSuchProviderException |
+//                     InvalidKeyException ex) {
+//                throw new RuntimeException(ex);
+//            }
+//        } else
+//            message = "aucune facture selectionnée";
+//        return v;
+//    }
+public boolean payer(String nom, String numVisa, int Row, String info) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, InvalidKeyException, NoSuchProviderException {
+    boolean v = false;
+    if (Row != -1) {
+        ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+        DataOutputStream dos1 = new DataOutputStream(baos1);
+        dos1.writeUTF(info);
+        //dos1.writeInt(numClient); inutile
+        dos1.writeUTF(nom);
+        dos1.writeUTF(numVisa);
+        byte[] messageClair = baos1.toByteArray();
+        // Cryptage symétrique du message
+        byte[] messageCrypte;
+        messageCrypte = MyCrypto.CryptSymDES(cleSession,messageClair);
+        RequetePayeFacture requete = new RequetePayeFacture(messageCrypte);
+        //RequetePayeFacture requete = new RequetePayeFacture(info, String.valueOf(numClient), nom, numVisa);
+        try {
+            oos.writeObject(requete);
+            ReponsePayeFacture reponse1 = (ReponsePayeFacture) ois.readObject();
+            // Validation du HMAC
+            Mac hm = Mac.getInstance("HMAC-MD5", "BC");
+            hm.init(cleSession);
+            byte[] reponseHMAC = reponse1.getHMAC();
+            byte[] reponseSansHMAC = reponse1.getMessage();
 
-            RequetePayeFacture requete = new RequetePayeFacture(info, String.valueOf(numClient), nom, numVisa);
-            try {
-                oos.writeObject(requete);
-                ReponsePayeFacture reponse1 = (ReponsePayeFacture) ois.readObject();
-                if (reponse1.getPaye()) {
+            hm.update(reponseSansHMAC);
+            byte[] hmacCalcul = hm.doFinal();
+            boolean payer = (reponseSansHMAC[0] == 1);   //retourne true ou false
+
+            if (MessageDigest.isEqual(reponseHMAC, hmacCalcul)) {
+                // Le HMAC est valide
+                System.out.println("HMAC validé");
+                if (payer) {
                     RequeteFacture requete1 = new RequeteFacture(String.valueOf(numClient));
                     oos.writeObject(requete1);
                     ReponseFacture reponse = (ReponseFacture) ois.readObject();
@@ -221,18 +264,20 @@ public class Model {
                     message = ("Facture payée");
                     v = true;
                 } else message = ("Probleme lors du paiement de la facture");
-            } catch (IOException | ClassNotFoundException | UnrecoverableKeyException | CertificateException |
-                     NoSuchAlgorithmException | KeyStoreException | SignatureException | NoSuchProviderException |
-                     InvalidKeyException ex) {
-                throw new RuntimeException(ex);
             }
-        } else
-            message = "aucune facture selectionnée";
-        return v;
-    }
+        } catch (IOException | ClassNotFoundException | UnrecoverableKeyException | CertificateException |
+                 NoSuchAlgorithmException | KeyStoreException | SignatureException | NoSuchProviderException |
+                 InvalidKeyException ex) {
+            throw new RuntimeException(ex);
+        }
+    } else
+        message = "aucune facture selectionnée";
+    return v;
+}
     public void caddie(String caddie)
     {
         try{
+
             RequeteCaddie requete = new RequeteCaddie(caddie);
             oos.writeObject(requete);
             ReponseCaddie reponse1 = (ReponseCaddie) ois.readObject();
@@ -265,6 +310,27 @@ public class Model {
 
         }
 
+    }
+    public List<Facture> deserializeFactures(byte[] facturesBytes) {
+        List<Facture> factures = new ArrayList<>();
+        ByteArrayInputStream bais = new ByteArrayInputStream(facturesBytes);
+        DataInputStream dis = new DataInputStream(bais);
+
+        try {
+            int numberOfFactures = dis.readInt();
+
+            for (int i = 0; i < numberOfFactures; i++) {
+                Facture facture = Facture.fromDataInputStream(dis);
+                if (facture != null) {
+                    factures.add(facture);
+                }
+            }
+        } catch (IOException e) {
+            // Gérez l'exception comme requis (peut-être la journalisation ou le renvoi d'une liste vide)
+            e.printStackTrace();
+        }
+
+        return factures;
     }
     public static PublicKey RecupereClePubliqueServeur() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         // Récupération de la clé publique de Jean-Marc dans le keystore deChristophe

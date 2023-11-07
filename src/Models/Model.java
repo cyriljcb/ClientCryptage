@@ -4,10 +4,8 @@ import Classe.Caddie;
 import Classe.Employe;
 import Classe.Facture;
 import Cryptage.MyCrypto;
-import OVESP.*;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import VESPAPS.*;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,11 +16,9 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.io.*;
-import java.net.Socket;
 import java.security.*;
 import javax.crypto.*;
 
@@ -153,7 +149,8 @@ public class Model {
                 oos.writeObject(requete);
                 ReponseFacture reponse = (ReponseFacture) ois.readObject();
 
-                if (reponse.getFactureCrypte() != null) {
+                if (
+                        reponse.getFactureCrypte() != null) {
                     byte[] facturesCryptees = reponse.getFactureCrypte();
 
                     System.out.println("les factures cryptées : "+facturesCryptees);

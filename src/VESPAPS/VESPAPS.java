@@ -1,9 +1,9 @@
-package OVESP;
+package VESPAPS;
 
 import java.net.Socket;
 import java.util.HashMap;
 
-public class OVESP //implements Protocole
+public class VESPAPS //implements Protocole
 {
     private HashMap<String, String> passwords;
     private HashMap<String, Socket> clientsConnectes;
@@ -11,7 +11,7 @@ public class OVESP //implements Protocole
 
     private Logger logger;
 
-    public OVESP(Logger log) {
+    public VESPAPS(Logger log) {
 
     }
 }

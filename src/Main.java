@@ -18,9 +18,6 @@ public class Main {
         Model model = new Model(); // Créez une instance du modèle
         ClientPaiement view = new ClientPaiement(); // Créez une instance de la vue
         Controller controller = new Controller(model, view); // Créez une instance du contrôleur
-        //view.addWindowCloseListener(controller);
-
-        // Mettez en place la vue dans la fenêtre principale
         JFrame frame = new JFrame("Maraicher en ligne");
         frame.add(view.getPanel_principal());
         frame.pack();

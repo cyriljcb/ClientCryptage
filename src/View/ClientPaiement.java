@@ -1,7 +1,6 @@
 package View;
 
 import Classe.*;
-import Controllers.TableClickListener;
 import Models.Model;
 import Models.ModelObserver;
 
@@ -10,10 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 
 public class ClientPaiement extends JFrame implements KeyListener, ModelObserver {
     private JPanel panel1;
@@ -32,6 +28,9 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
     private JScrollPane JScrollPane2;
     private JScrollPane JScrollPane1;
     private JLabel JLabelPanier;
+    private JComboBox colorComboBox;
+    private JPanel panel3;
+    private JPanel panel2;
     private DefaultTableModel tabModel ;
     private DefaultTableModel tabModel1;
     private JFrame mainWindow;
@@ -50,10 +49,14 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
     }
     @Override
     public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        System.out.println("touche : " + key);
-        if (key == KeyEvent.VK_MINUS) {  // Touche "-"
+        char keyChar = e.getKeyChar();
+        if (keyChar == '-') {  // Touche "-"
             creerButton.setVisible(true);
+        } else if (keyChar =='$') {
+            System.out.println("$ pressé");
+            colorComboBox.setVisible(true);
+
+
         }
     }
 
@@ -116,7 +119,7 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
         numClient.setEnabled(false);
         nomVisa.setEnabled(false);
         NumVisa.setEnabled(false);
-
+        colorComboBox.setVisible(false);
         AbstractDocument document = (AbstractDocument) jTextFieldLogin.getDocument();
         document.setDocumentFilter(new MaxLengthDocumentFilter(maxLength));
 
@@ -129,7 +132,39 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
         AbstractDocument document4 = (AbstractDocument) NumVisa.getDocument();
         document4.setDocumentFilter(new MaxLengthDocumentFilter(maxLength));
 
-        panel1.setSize(1000,1000);
+
+        //pour le changement de couleur
+        colorComboBox.addItem("orange");
+        colorComboBox.addItem("vert");
+        colorComboBox.addItem("bleu");
+        Color Green = new Color(172,250,189);
+        Color Orange = new Color(250,155,109);
+        Color Blue = new Color(192,201,250);
+        colorComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String selectedColor = (String) colorComboBox.getSelectedItem();
+
+                    // Modifier la couleur du panel en fonction de l'élément sélectionné
+                    if ("orange".equals(selectedColor)) {
+                        panel1.setBackground(Orange);
+                        panel2.setBackground(Orange);
+                        panel3.setBackground(Orange);
+                    } else if ("vert".equals(selectedColor)) {
+                        panel1.setBackground(Green);
+                        panel2.setBackground(Green);
+                        panel3.setBackground(Green);
+                    } else if ("bleu".equals(selectedColor)) {
+                        panel1.setBackground(Blue);
+                        panel2.setBackground(Blue);
+                        panel3.setBackground(Blue);
+                    }
+                }
+
+            }
+        });
+
 
         this.addKeyListener(this);
         this.setFocusable(true);

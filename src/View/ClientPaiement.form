@@ -3,20 +3,20 @@
   <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="944" height="502"/>
+      <xy x="20" y="20" width="965" height="502"/>
     </constraints>
     <properties>
-      <background color="-5440835"/>
+      <background color="-1"/>
     </properties>
     <border type="none"/>
     <children>
-      <grid id="dd582" layout-manager="GridLayoutManager" row-count="3" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="dd582" binding="panel2" layout-manager="GridLayoutManager" row-count="3" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="1" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <background color="-5440835"/>
+          <background color="-1"/>
         </properties>
         <border type="none"/>
         <children>
@@ -72,13 +72,13 @@
               <text value="logout"/>
             </properties>
           </component>
-          <grid id="56922" layout-manager="GridLayoutManager" row-count="6" column-count="20" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="56922" binding="panel3" layout-manager="GridLayoutManager" row-count="6" column-count="20" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <background color="-5440835"/>
+              <background color="-1"/>
             </properties>
             <border type="none"/>
             <children>
@@ -188,6 +188,12 @@
                 <properties>
                   <text value="panier"/>
                 </properties>
+              </component>
+              <component id="89b2c" class="javax.swing.JComboBox" binding="colorComboBox">
+                <constraints>
+                  <grid row="0" column="16" row-span="1" col-span="4" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
               </component>
             </children>
           </grid>

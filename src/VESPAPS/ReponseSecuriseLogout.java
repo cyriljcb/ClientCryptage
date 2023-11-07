@@ -1,8 +1,8 @@
 package VESPAPS;
 
-public class ReponseLogout implements Reponse{
+public class ReponseSecuriseLogout implements ReponseSecurise {
     private boolean log;
-    ReponseLogout(boolean v) {
+    ReponseSecuriseLogout(boolean v) {
         log = v;
     }
     public boolean getLog() {

@@ -1,18 +1,18 @@
 package VESPAPS;
 
-public class RequetePayeFacture implements Requete{
+public class RequeteSecurisePayeFacture implements RequeteSecurise {
     private String nomVisa;
     private String numVisa;
     private String numClient;
     private String numFacture;
     private byte[] chaineCrypte;
-    public RequetePayeFacture(String numFact,String numCli, String nomvisa, String numvisa) {
+    public RequeteSecurisePayeFacture(String numFact, String numCli, String nomvisa, String numvisa) {
         numFacture = numFact;
         numClient = numCli;
         nomVisa = nomvisa;
         numVisa = numvisa;
     }
-    public RequetePayeFacture(byte[] chaineCrypte)
+    public RequeteSecurisePayeFacture(byte[] chaineCrypte)
     {
         this.chaineCrypte = chaineCrypte;
     }

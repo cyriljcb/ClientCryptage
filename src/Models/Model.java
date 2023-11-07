@@ -111,12 +111,12 @@ public class Model {
                 byte[] messageCrypte;
                 messageCrypte = MyCrypto.CryptSymDES(cleSession,messageClair);
 
-                RequeteLogin requete = new RequeteLogin(nom, mdp, creation);
+                RequeteSecuriseLogin requete = new RequeteSecuriseLogin(nom, mdp, creation);
                 requete.setData1(cleSessionCrypte);
                 requete.setData2(messageCrypte);
                 oos.writeObject(requete);
                 System.out.println("est passé dans le login requete" + requete);
-                ReponseLogin reponse = (ReponseLogin) ois.readObject();
+                ReponseSecuriseLogin reponse = (ReponseSecuriseLogin) ois.readObject();
                 if (reponse.isValide()) {
                     employe = new Employe(nom, mdp);
                     message = reponse.getMessage();
@@ -143,11 +143,11 @@ public class Model {
         numClient = Integer.parseInt(idCli);
 
         if (idCli.matches("\\d+")) {
-            RequeteFacture requete = new RequeteFacture(idCli);
+            RequeteSecuriseFacture requete = new RequeteSecuriseFacture(idCli);
 
             try {
                 oos.writeObject(requete);
-                ReponseFacture reponse = (ReponseFacture) ois.readObject();
+                ReponseSecuriseFacture reponse = (ReponseSecuriseFacture) ois.readObject();
 
                 if (
                         reponse.getFactureCrypte() != null) {
@@ -188,11 +188,11 @@ public boolean payer(String nom, String numVisa, int Row, String info) throws IO
         // Cryptage symétrique du message
         byte[] messageCrypte;
         messageCrypte = MyCrypto.CryptSymDES(cleSession,messageClair);
-        RequetePayeFacture requete = new RequetePayeFacture(messageCrypte);
-        //RequetePayeFacture requete = new RequetePayeFacture(info, String.valueOf(numClient), nom, numVisa);
+        RequeteSecurisePayeFacture requete = new RequeteSecurisePayeFacture(messageCrypte);
+        //RequeteSecurisePayeFacture requete = new RequeteSecurisePayeFacture(info, String.valueOf(numClient), nom, numVisa);
         try {
             oos.writeObject(requete);
-            ReponsePayeFacture reponse1 = (ReponsePayeFacture) ois.readObject();
+            ReponseSecurisePayeFacture reponse1 = (ReponseSecurisePayeFacture) ois.readObject();
             // Validation du HMAC
             Mac hm = Mac.getInstance("HMAC-MD5", "BC");
             hm.init(cleSession);
@@ -207,9 +207,9 @@ public boolean payer(String nom, String numVisa, int Row, String info) throws IO
                 // Le HMAC est valide
                 System.out.println("HMAC validé");
                 if (payer) {
-                    RequeteFacture requete1 = new RequeteFacture(String.valueOf(numClient));
+                    RequeteSecuriseFacture requete1 = new RequeteSecuriseFacture(String.valueOf(numClient));
                     oos.writeObject(requete1);
-                    ReponseFacture reponse = (ReponseFacture) ois.readObject();
+                    ReponseSecuriseFacture reponse = (ReponseSecuriseFacture) ois.readObject();
                     if (reponse.getFactureCrypte() != null) {
                         byte[] facturesCryptees = reponse.getFactureCrypte();
                         System.out.println("les factures cryptées : "+facturesCryptees);
@@ -238,9 +238,9 @@ public boolean payer(String nom, String numVisa, int Row, String info) throws IO
         boolean v = false;
         try{
 
-            RequeteCaddie requete = new RequeteCaddie(caddie);
+            RequeteSecuriseCaddie requete = new RequeteSecuriseCaddie(caddie);
             oos.writeObject(requete);
-            ReponseCaddie reponse1 = (ReponseCaddie) ois.readObject();
+            ReponseSecuriseCaddie reponse1 = (ReponseSecuriseCaddie) ois.readObject();
             if (reponse1.getCaddieCrypte() != null) {
                 byte[] caddieCrypte = reponse1.getCaddieCrypte();
 
@@ -265,10 +265,10 @@ public boolean payer(String nom, String numVisa, int Row, String info) throws IO
         if (socket != null) {
             if (islogged) {
 
-                RequeteLOGOUT requete = new RequeteLOGOUT(employe.getLogin());
+                RequeteSecuriseLOGOUT requete = new RequeteSecuriseLOGOUT(employe.getLogin());
                 try {
                     oos.writeObject(requete);
-                    ReponseLogout reponse = (ReponseLogout) ois.readObject();
+                    ReponseSecuriseLogout reponse = (ReponseSecuriseLogout) ois.readObject();
                     socket.close();
                     oos.close();
                     ois.close();

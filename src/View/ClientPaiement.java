@@ -55,11 +55,8 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
         } else if (keyChar =='$') {
             System.out.println("$ pressé");
             colorComboBox.setVisible(true);
-
-
         }
     }
-
     @Override
     public void keyTyped(KeyEvent e) {
         // Ne rien faire (corps vide) ou lancer une exception non prise en charge
@@ -161,11 +158,8 @@ public class ClientPaiement extends JFrame implements KeyListener, ModelObserver
                         panel3.setBackground(Blue);
                     }
                 }
-
             }
         });
-
-
         this.addKeyListener(this);
         this.setFocusable(true);
         this.requestFocusInWindow();

@@ -280,7 +280,6 @@ public boolean payer(String nom, String numVisa, int Row, String info) throws IO
                 }
             }
 
-
         }
 
     }
